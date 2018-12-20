@@ -7,6 +7,7 @@ import makelist
 import json
 import collections
 from privval import *
+from idol_db import *
 
 channels = []
 servers = []
@@ -16,7 +17,7 @@ def time_str():
 	return datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
 def DEBUG(s):
-	debug_log.append(s)
+	debug_log.append("[%s] %s\n" % (time_str(), s))
 	if len(debug_log) > DEBUG_LOG_COUNT:
 		debug_log.popleft()
 
@@ -99,6 +100,9 @@ async def create_idol_roles(iList, client, server):
 
 	# restore roles
 	for ir in server.roles:
+		if not isIdolRole(ir.name):
+			continue
+
 		idol_roles.append(ir)
 		DEBUG("Restore role, %s" % ir.name)
 
@@ -106,8 +110,8 @@ async def create_idol_roles(iList, client, server):
 		role_name = i["a_name_romanize"].upper()
 		if find_idol_role(role_name) != None:
 			continue
-			
-		DEBUG('Create/Restore role, %s' % role_name)
+
+		DEBUG('Create role, %s' % role_name)
 		idol_roles.append(await client.create_role(
 			server, name=role_name, colour=Colour(int(i["color"]["hex"], 16))))
 
@@ -116,3 +120,46 @@ def find_idol_role(name):
 		if i.name == name:
 			return i
 	return None
+
+def isIdolRole(name):
+	for i in GetIdolJson():
+		if name == i["a_name_romanize"].upper():
+			return True
+	return False
+
+def search_idols(query):
+	idols = GetIdolJson()
+	result = []
+	for q in query:
+		for i in range(0, len(idols)):
+			if idols[i] == None:
+				continue
+
+			if re.search(r"%s" % q, idols[i]["name"]):
+				result.append(idols[i])
+				idols[i] = None
+				continue
+
+			if re.search(r"%s" % q, idols[i]["cv_name"]):
+				result.append(idols[i])
+				idols[i] = None
+				continue
+
+			if re.search(r"%s" % q, idols[i]["name_ruby"]):
+				result.append(idols[i])
+				idols[i] = None
+				continue
+
+			if re.search(r"%s" % q, idols[i]["name_romanize"]):
+				result.append(idols[i])
+				idols[i] = None
+				continue
+
+
+			if re.search(r"%s" % q, idols[i]["birth"]):
+				result.append(idols[i])
+				idols[i] = None
+				continue
+
+
+	return result

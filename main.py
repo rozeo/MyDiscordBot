@@ -79,24 +79,24 @@ async def on_message(message):
 		if u == ADMIN_USERID or u == SUB_ADMIN_USERID:
 			if cmd == "view_log":
 				log_str = build_debug_log()
-				await client.send_message(find_text_channel(option.get('default_bot_text_channel'))["obj"], '```' + log_str + '```')
+				await client.send_message(find_text_channel(option.get('debug_log_channel'))["obj"], '```' + log_str + '```')
 				
 			if cmd == "change_active":
 				if active:
 					active = False
 					DEBUG("bot deactivated.")
 					await deactivate_bot()
-					await client.send_message(find_text_channel(option.get('default_bot_text_channel'))["obj"], "[%s] bot機能を OFF にしましたよ。" % time_str())
+					await client.send_message(find_text_channel(option.get('debug_log_channel'))["obj"], "[%s] bot機能を OFF にしましたよ。" % time_str())
 				else:
 					active = True
 					DEBUG("bot activated.")
-					await client.send_message(find_text_channel(option.get('default_bot_text_channel'))["obj"], "[%s] bot機能を ON にしましたよ。" % time_str())
+					await client.send_message(find_text_channel(option.get('debug_log_channel'))["obj"], "[%s] bot機能を ON にしましたよ。" % time_str())
 
 		if cmd == "status":
 			if active:
-				await client.send_message(find_text_channel(option.get('default_bot_text_channel'))["obj"], "現在 bot機能は ON になっていますよ。")
+				await client.send_message(message.channel, "現在 bot機能は ON になっていますよ。")
 			else:
-				await client.send_message(find_text_channel(option.get('default_bot_text_channel'))["obj"], "現在 bot機能は OFF になっていますよ。")
+				await client.send_message(message.channel, "現在 bot機能は OFF になっていますよ。")
 
 		if cmd == "option":
 			for a in arg:
@@ -257,6 +257,22 @@ async def on_message(message):
 					await client.remove_roles(message.author, r)
 				await client.send_message(message.channel, "役職をすべて削除しました。")
 
+		elif cmd == "search":
+			if len(arg) < 1:
+				return
+
+			res = search_idols(arg)
+			if len(res) == 0:
+				await client.send_message(message.channel,
+					"\"%s\" で検索しましたが、該当するアイドルがいませんでした。" % " ".join(arg))
+
+			else:
+				s = ""
+				for d in res:
+					s += "```" + build_stat_str(d) + "```\n"
+				await client.send_message(message.channel,
+					"\"%s\" での検索で %d人のアイドルが見つかりました。\n%s" % (" ".join(arg), len(res), s))
+
 		elif cmd == "reload":
 			await reload()
 
@@ -307,7 +323,7 @@ async def main(loop):
 	  	await client.close()
 	  	info = sys.exc_info()
 	  	DEBUG("System\n Exception:\n\t%s\n\t%s\n\t%s\n" % (info[0], info[1], info[2]))
-	  	await asyncio.sleep(option.get('reconnect_wait'))
+	  	await asyncio.sleep(int(option.get('reconnect_wait')))
 	  	DEBUG("System: Reconnecting.")
 	  	
 	t.join()

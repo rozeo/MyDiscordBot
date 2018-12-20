@@ -38,7 +38,7 @@ class kotoha_player:
 		try:
 			to = arg[0]
 		except (KeyError, IndexError):
-			to = option.get('default_voice_channel') # default
+			to = self.option.get('default_voice_channel') # default
 
 		vc = find_voice_channel(to)
 

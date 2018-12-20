@@ -7,7 +7,9 @@ with codecs.open("idolListBase.csv", "r", "utf-8") as fp:
 	for s in fp.readlines():
 		s = s.replace('\r\n', '')
 		print(s)
-		n, c, rgb, birth, name_ruby, cv_ruby, romanize = s.split(',')
+		n, c, rgb, birth, name_ruby, cv_ruby, romanize, \
+		ty, age, height, weight, bt, hn, bs, ws, hs, \
+		conste, fr, hob, sk, fav  = s.split(',')
 
 		r = int(rgb[0] + rgb[1], 16)
 		g = int(rgb[2] + rgb[3], 16)
@@ -64,15 +66,36 @@ with codecs.open("idolListBase.csv", "r", "utf-8") as fp:
 			"a_cv_name_ruby": cca,
 			"b_cv_name_ruby": ccb,
 
+			"type": ty,
+
 			"birth": birth,
 			"birth_month": birth.split('/')[0],
 			"birth_day": birth.split('/')[1],
+			"birthplace": fr,
 
 			"color": {
 				"r": r,
 				"g": g,
 				"b": b,
 				"hex": rgb
+			},
+
+			"stat": {
+				"age": age,
+				"height": height,
+				"weight": weight,
+				"three_size": {
+					"B": bs,
+					"W": ws,
+					"H": hs
+				},
+
+				"blood_type": bt,
+				"handness": hn,
+				"constellation": conste,
+				"hobby": hob,
+				"skill": sk,
+				"favorite": fav
 			}
 		})
 with codecs.open('idolInfo.json', 'w', 'utf-8') as fp:
